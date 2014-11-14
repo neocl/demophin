@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>DELPH-IN Demo</title>
+</head>
+<body>
+    <form method="POST" action="/">
+        {{ form.hidden_tag() }}
+        {{ form.sentence.label }} {{ form.sentence(size=50) }}
+        <input type="submit" value="Parse">
+    </form>
+    {% if result is defined %}
+        <p>{{ result['NOTES']|safe }}</p>
+        <p>{{ result['ERRORS']|safe }}</p>
+        <ol>
+        {% for res in result['RESULTS'] %}
+            <li>{{ res['MRS'] }}</li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+</body>
+</html>
