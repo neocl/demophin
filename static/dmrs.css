@@ -1,0 +1,85 @@
+
+.node {
+  pointer-events: all;
+  fill: #000;
+  stroke: none;
+}
+
+.nodeText {
+  stroke: none;
+  font-family: sans-serif;
+  font-size: 16px;
+  text-anchor: middle;
+}
+
+.nodeText:hover {
+  font-weight: bold;
+}
+
+.node.selected {
+  font-weight: bold;
+}
+
+.nodeBox {
+  stroke-width: 2px;
+  fill: none;
+}
+
+.link {
+  stroke: #000;
+  fill: #000;
+  stroke-opacity: .5;
+  fill-opacity: .5;
+}
+
+.linkedge {
+  fill: none;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  marker-end: url(#arrowhead);    
+}
+
+.eqedge {
+  fill: none;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-dasharray: 5,5;
+}
+
+.topedge {
+  fill: #f00;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-dasharray: 5,5;
+  marker-end: url(#arrowhead);    
+}
+
+.linkend {
+  stroke-linejoin: none;
+  stroke-opacity: .5;
+  fill-opacity: .5;
+}
+
+.rargname {
+  fill: #000;
+  stroke: none;
+  stroke-width: 1px;
+  font-family: sans-serif;
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.node.in { fill: red; }
+.node.out { fill: blue; }
+.node.labelset { stroke: gold; }
+.node.scope { stroke: violet; }
+.node.out.labelset { fill: green; stroke: gold;}
+.node.in.labelset { fill: darkorange; stroke: gold;}
+
+.link.in { fill: red; stroke: red; }
+.link.out { fill: blue; stroke: blue; }
+.link.labelset { fill: gold; stroke: gold; }
+.link.scope { fill: violet; stroke: violet; }
+.link.in.labelset { fill: darkorange; stroke: darkorange; }
+.link.out.labelset { fill: green; stroke: green; }
+
