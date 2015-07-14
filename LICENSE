@@ -1,6 +1,18 @@
 The MIT License (MIT)
 
-Copyright (c) 2014 Michael Wayne Goodman
+Demophin, minidelphin.py, d3.arcdiagram.js, and bottle.py all use the same terms
+of the MIT license.
+
+Demophin: Copyright (c) 2014 Michael Wayne Goodman
+
+minidelphin.py: Copyright (c) 2013 Michael Wayne Goodman
+  (see https://github.com/goodmami/pydelphin)
+
+d3.arcdiagram.js: Copyright (c) 2015 Michael Wayne Goodman
+  (see https://github.com/goodmami/d3-arcdiagram)
+
+bottle.py: Copyright (c) 2014, Marcel Hellkamp.
+  (see https://github.com/bottlepy/bottle)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,4 +31,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-

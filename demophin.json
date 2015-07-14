@@ -1,0 +1,10 @@
+{
+	"demophin": {
+		"title": "Demophin: A Web Demo for DELPH-IN Grammars",
+		"grammar": "gram.dat",
+		"ace": {
+			"executable": "ace",
+			"cmdargs": ["-n", "5"]
+		}
+	}
+}

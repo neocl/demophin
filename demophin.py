@@ -1,52 +1,77 @@
 
 import sys
+#from os.path import abspath, dirname
 import json
-from delphin.mrs import simplemrs
-from delphin.interfaces import ace
-from flask import Flask, render_template, request
-from flask_wtf import Form
-from wtforms import StringField
-from wtforms.validators import DataRequired
 
-app = Flask(__name__)
-parser = None
+from bottle import default_app, request, route, run, static_file, view
 
-class ActionForm(Form):
-    sentence = StringField('sentence', validators=[DataRequired()])
+from minidelphin import loads_one, nodes, links, AceParser
+
+#cwd = abspath(dirname(__file__))
+#staticdir = pjoin(cwd, 'static')
+app = default_app()
+
+with open('./demophin.json') as fp:
+    app.config.load_dict(json.load(fp))
+
+ace_options = {
+    'executable': app.config['demophin.ace.executable'],
+    'cmdargs': app.config['demophin.ace.cmdargs']
+}
 
 def jsonify_dmrs(x):
     data = {'nodes': [], 'links': []}
-    x = simplemrs.loads_one(x)
-    for node in x.nodes:
+    x = loads_one(x)
+    for node in nodes(x):
+        cfrom, cto = node[3][1] if node[3] is not None else -1, -1
+        cvarsort = node[2].get('cvarsort') if node[2] is not None else None
         data['nodes'].append({
-            'id': node.nodeid,
-            'pred': node.pred.short_form(),
-            'cfrom': node.cfrom,
-            'cto': node.cto,
-            'cvarsort': node.cvarsort
+            'id': node[0],
+            'pred': node[1].short_form(),
+            'cfrom': cfrom,
+            'cto': cto,
+            'cvarsort': cvarsort
         })
-    for link in x.links:
+    for link in links(x):
         data['links'].append({
-            'start': link.start,
-            'end': link.end,
-            'rargname': link.argname or "",
-            'post': link.post
+            'start': link[0],
+            'end': link[1],
+            'rargname': link[2] or "",
+            'post': link[3]
         })
     return json.dumps(data)
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    form = ActionForm()
-    if request.method == 'POST' and parser is not None:
-        sent = request.form['sentence']
+
+def parse_sentence(sent):
+    if not sent:
+        return None
+    grm = app.config['demophin.grammar']
+    with AceParser(grm, **ace_options) as parser:
         result = parser.interact(sent)
-        result['RESULTS'] = [jsonify_dmrs(res['MRS'])
-                             for res in result['RESULTS']]
-    else:
-        result = None
-    return render_template('base.html', form=form, result=result)
+    if not result:
+        return None
+    result['RESULTS'] = [jsonify_dmrs(res['MRS'])
+                         for res in result['RESULTS']]
+    return result
+
+
+@route('/', method='GET')
+@route('/', method='POST')
+@view('main')
+def index():
+    sent = request.forms.get('sentence')
+    result = parse_sentence(sent)
+    return {
+        'title': app.config['demophin.title'],
+        'sentence': sent,
+        'result': result
+    }
+
+
+@route('/static/<filepath:path>')
+def server_static(filepath):
+    return static_file(filepath, root='./static')
+
 
 if __name__ == '__main__':
-    app.secret_key = '\xa0k\xbd\xab\x16\xd7\xa6\x97\ri\xc1\xb2\x1e\xee\xb2\x06\xcc\x8e\xc8\xe6\xf4%\x17\xa6'
-    with ace.AceParser(sys.argv[1], cmdargs=['-n', '5']) as parser:
-        app.run(port=5050, debug=True)
+    run()
