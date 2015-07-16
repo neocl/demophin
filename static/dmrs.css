@@ -1,4 +1,22 @@
 
+.sentence {
+  text-align: center;
+  font-size: larger;
+  font-weight: bold;
+}
+
+.result {
+  display: block;
+  margin: 10px;
+}
+
+.dmrs {
+  display: inline-block;
+  background-color: #FFF;
+  border-radius: 10px;
+  overflow: auto;
+}
+
 .node {
   pointer-events: all;
   fill: #000;
@@ -82,3 +100,6 @@
 .link.in.labelset { fill: darkorange; stroke: darkorange; }
 .link.out.labelset { fill: green; stroke: green; }
 
+.status {
+  font-size: small;
+}

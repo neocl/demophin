@@ -1,5 +1,5 @@
 
-var width = 600,
+var maxWidth = 600,
     height = 300;
 
 var level_dy = 25,  // vertical separation between edges
@@ -198,18 +198,86 @@ function toggleSticky(id, node, d) {
     return d.sticky;
 }
 
-function dmrsDisplay(id, graph) {
+// // tiny path generator for an orthogonal path
+// function pathgen() {
+//     var gen = {},
+//         x = function(x) { return x; },
+//         y = function(y) { return y; };
+
+//     gen.ortho = function(d) {
+//         var x1 = x(d.x1),
+//             x2 = x(d.x2),
+//             height = y(d.height),
+//             dir = x1 < x2 ? 1 : -1;
+//         return [
+//             "M", x1, 0,
+//             "v", -(height-10),
+//             "q", 0, -10, dir*10, -10,
+//             "H", x2 - (dir*10),
+//             "q", (dir*10), 0, (dir*10), +10,
+//             "V", -2
+//         ].join(" ");
+//     };
+
+//     gen.xscale = function(a) {
+//       if (!arguments.length) return x;
+//       x = a;
+//       return gen;
+//     }
+
+//     gen.yscale = function(a) {
+//       if (!arguments.length) return y;
+//       y = a;
+//       return gen;
+//     }
+
+//     return gen;
+// }
+
+// function dmrsDisplay(id, graph) {
+//   arcd = d3.arcDiagram()
+//     .nodeWidth(function(d) { return d.width; })
+//     .separation(node_dx)
+//     .nodeXOffset(function(d) { return d.width/2; })
+//     .nodes(graph.nodes)
+//     .links(graph.links);
+
+//   var svg = d3.select(id).append("svg")
+//     .append("svg:g");
+  
+//   var nodes = svg.selectAll(".node")
+//       .data(arcd.nodes())
+//     .enter().append("svg:g")
+//       .attr("class", "node");
+//   nodes.append("svg:text")
+//     .attr("class", "nodeText")
+//     .text(function(d) { return d.pred + d.carg ? "(" + d.carg + ")" : ""; })
+//     .each(function(d) { d.width = this.getBBox().width; });
+
+//   arcd(); // node widths are established; calculate the layout
+//   // and set the width and height of the SVG
+//   d3.select(id)
+//     .attr("width", d3.min(maxWidth, d3.max(data.nodes, function(d) { return d.x + d.width + node_dx; })))
+//     .attr("height", d3.max(data.links, function(d) { return d.level; }) * level_dy);
+
+//   var xscale = d3.scale.linear();  // we're calculating our own widths, so just do 1-to-1
+//   var yscale = d3.scale.linear()
+//     .domain([0, d3.max(arcd.links().map(function(l) { return l.height; }))+1])
+//     .range([0, upperHeight]);
+// }
+
+function dmrsDisplay(svgElem, graph) {
 //  d3.json(url, function(error, graph) {
       // calculate source and target for links
       prepareGraph(graph);
 
-      var svg = d3.select(id).append("svg")
-          .attr("width", "100%")
-          .attr("height", ((graph.maxTopLevel - graph.maxBottomLevel + 3) * level_dy))
-          .append("svg:g")
+      var id = svgElem;
+      var svg = d3.select(svgElem)
+        .attr("height", ((graph.maxTopLevel - graph.maxBottomLevel + 3) * level_dy));
+      var g = svg.append("svg:g")
           .attr("transform", "translate(0," + ((graph.maxTopLevel + 2) * level_dy) + ")");
       
-      svg.append("defs").append("marker")
+      g.append("defs").append("marker")
           .attr("class", "linkend")
           .attr("id", "arrowhead")
           .attr("refX", 1) /*must be smarter way to calculate shift*/
@@ -221,13 +289,19 @@ function dmrsDisplay(id, graph) {
               .attr("d", "M0,0 L1,2 L0,4 L5,2 Z"); //this is actual shape for arrowhead
 
       var x_pos = 10;
-      var nodes = svg.selectAll(".node").order()
+      var nodes = g.selectAll(".node").order()
           .data(graph.nodes)
         .enter().append("svg:g")
           .attr("class", "node");
       nodes.append("svg:text")
           .attr("class", "nodeText")
-          .text(function(d) { return d.pred; })
+          .text(function(d) {
+            if (d.carg) {
+              return d.pred + "(" + d.carg + ")";
+            } else {
+              return d.pred;
+            }
+          })
           .attr("x", function(d, i) {
               d.bbox = this.getBBox();
               halfLen = d.bbox.width / 2;
@@ -259,11 +333,11 @@ function dmrsDisplay(id, graph) {
               graph.sticky = stickyState;
               updateHighlights(id);
           });
-  
+
       // not working...
-      //svg.attr("width", d3.sum(nodes.selectAll(".nodeText"), function(d) { return d.attr("bbox").width + node_dx; }));
-  
-      var links = svg.selectAll(".link").order()
+      svg.attr("width", d3.sum(nodes.data(), function(d) { return d.bbox.width + node_dx; }));
+
+      var links = g.selectAll(".link").order()
           .data(graph.links)
         .enter().append("svg:g")
           .attr("class", "link");
@@ -292,4 +366,54 @@ function dmrsDisplay(id, graph) {
           .attr("y", function(d) { return d.midpoint.y * (-1 * d.dir) - 3; })
           .text(function(d) { return d.rargname + "/" + d.post; } );
 //  });
+}
+
+function parseSentence(form) {
+  d3.select("#parseresults").selectAll(".result").remove();
+  d3.json("/parse")
+    .post(new FormData(form), function(error, data) {
+      if (data) {
+        d3.select("#sentence").text('Parse results for "'+data.sentence+'"');
+        var results = d3.select("#parseresults").selectAll(".result")
+            .data(data.result.RESULTS)
+          .enter().append("div")
+            .attr("class", "result");
+        dmrs = results.append("div")
+          .attr("class", "dmrs");
+        dmrs.append("svg")
+          .attr("id", function(d, i) { return "dmrs" + i; })
+          .each(function(d, i) { dmrsDisplay(this, d); });
+        dmrs.append("div")
+          .attr("class", "realizations")
+          .append("a")
+            .attr("href", "javascript:void(0)")
+            .text('generate')
+            .on("click", function(d) { generateSentences(this.parentElement, d.mrs); });
+        d3.select("#parsestatus").text(data.result.NOTES);
+      } else {
+        document.getElementById("results").innerHTML = "Server error.";
+      }
+    });
+}
+
+function generateSentences(elem, mrs) {
+  var reals = d3.select(elem);
+  reals.select("a").remove();
+  reals.append("p").text("generating...");
+  var fd = new FormData();
+  fd.append("mrs", mrs);
+  d3.json("/generate")
+    .post(fd, function(error, data) {
+      if (data) {
+        reals.select("p").remove();
+        reals.append("ul").selectAll(".realization")
+            .data(data.RESULTS)
+          .enter().append("li")
+            .attr("class", "realization")
+            .text(function(d) {return d;});
+      } else {
+        reals.append("p")
+          .text("No realizations found.")
+      }
+    });
 }
