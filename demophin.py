@@ -1,9 +1,12 @@
 
 import sys
+import os.path
 #from os.path import abspath, dirname
 import json
 
-from bottle import default_app, request, route, run, static_file, view
+from bottle import (
+    abort, default_app, request, route, run, static_file, view
+)
 
 from minidelphin import loads_one, nodes, links, AceParser, AceGenerator
 
@@ -28,7 +31,10 @@ def server_static(filepath):
 @route('/')
 @view('main')
 def index():
-    return {'title': app.config['demophin.title']}
+    data = {'title': app.config['demophin.title'], 'errors': []}
+    if not os.path.exists(app.config['demophin.grammar']):
+        data['errors'].append('Grammar not available.')
+    return data
 
 
 @route('/parse', method='POST')

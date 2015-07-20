@@ -54,7 +54,7 @@
   fill: none;
   stroke-width: 2px;
   stroke-linejoin: round;
-  marker-end: url(#arrowhead);    
+  marker-end: url(#arrowhead);
 }
 
 .eqedge {
@@ -69,7 +69,7 @@
   stroke-width: 2px;
   stroke-linejoin: round;
   stroke-dasharray: 5,5;
-  marker-end: url(#arrowhead);    
+  marker-end: url(#arrowhead);
 }
 
 .linkend {
@@ -102,4 +102,9 @@
 
 .status {
   font-size: small;
+}
+
+.error {
+  font-weight: bold;
+  font-size: large;
 }
