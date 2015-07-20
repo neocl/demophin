@@ -1,4 +1,10 @@
 
+.header {
+  text-align: center;
+  font-size: x-large;
+  font-weight: bold;
+}
+
 .sentence {
   text-align: center;
   font-size: larger;

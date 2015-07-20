@@ -370,30 +370,36 @@ function dmrsDisplay(svgElem, graph) {
 
 function parseSentence(form) {
   d3.select("#parseresults").selectAll(".result").remove();
-  d3.json("/parse")
+  d3.json("parse")
     .post(new FormData(form), function(error, data) {
       if (data) {
+        // Push history so the URL bar changes when a new sentence is parsed.
+        history.pushState(data, document.title, "parse?sentence=" + data.sentence);
         d3.select("#sentence").text('Parse results for "'+data.sentence+'"');
-        var results = d3.select("#parseresults").selectAll(".result")
-            .data(data.result.RESULTS)
-          .enter().append("div")
-            .attr("class", "result");
-        dmrs = results.append("div")
-          .attr("class", "dmrs");
-        dmrs.append("svg")
-          .attr("id", function(d, i) { return "dmrs" + i; })
-          .each(function(d, i) { dmrsDisplay(this, d); });
-        dmrs.append("div")
-          .attr("class", "realizations")
-          .append("a")
-            .attr("href", "javascript:void(0)")
-            .text('generate')
-            .on("click", function(d) { generateSentences(this.parentElement, d.mrs); });
-        d3.select("#parsestatus").text(data.result.NOTES);
+        showParseResults(data.result);
       } else {
-        document.getElementById("results").innerHTML = "Server error.";
+        document.getElementById("parseresults").innerHTML = "Server error.";
       }
     });
+}
+
+function showParseResults(result) {
+  var results = d3.select("#parseresults").selectAll(".result")
+      .data(result.RESULTS)
+    .enter().append("div")
+      .attr("class", "result");
+  dmrs = results.append("div")
+    .attr("class", "dmrs");
+  dmrs.append("svg")
+    .attr("id", function(d, i) { return "dmrs" + i; })
+    .each(function(d, i) { dmrsDisplay(this, d); });
+  dmrs.append("div")
+    .attr("class", "realizations")
+    .append("a")
+      .attr("href", "javascript:void(0)")
+      .text('Generate')
+      .on("click", function(d) { generateSentences(this.parentElement, d.mrs); });
+  d3.select("#parsestatus").text(result.NOTES);
 }
 
 function generateSentences(elem, mrs) {
@@ -402,7 +408,7 @@ function generateSentences(elem, mrs) {
   reals.append("p").text("generating...");
   var fd = new FormData();
   fd.append("mrs", mrs);
-  d3.json("/generate")
+  d3.json("generate")
     .post(fd, function(error, data) {
       if (data) {
         reals.select("p").remove();

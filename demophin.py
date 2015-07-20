@@ -5,7 +5,7 @@ import os.path
 import json
 
 from bottle import (
-    abort, default_app, request, route, run, static_file, view
+    abort, error, default_app, redirect, request, route, run, static_file, view
 )
 
 from minidelphin import loads_one, nodes, links, AceParser, AceGenerator
@@ -22,6 +22,10 @@ ace_options = {
     'cmdargs': app.config['demophin.ace.cmdargs']
 }
 
+grammars = {}
+for gramdata in app.config['demophin.grammars']:
+    grammars[gramdata['name'].lower()] = gramdata
+
 
 @route('/static/<filepath:path>')
 def server_static(filepath):
@@ -29,29 +33,57 @@ def server_static(filepath):
 
 
 @route('/')
-@view('main')
+@view('index')
 def index():
-    data = {'title': app.config['demophin.title'], 'errors': []}
-    if not os.path.exists(app.config['demophin.grammar']):
-        data['errors'].append('Grammar not available.')
-    return data
-
-
-@route('/parse', method='POST')
-def parse():
-    sent = request.forms.get('sentence')
-    result = parse_sentence(sent)
     return {
-        'sentence': sent,
+        'title': app.config['demophin.title'],
+        'grammars': grammars
+    }
+
+
+@route('/<grmkey>')
+def bare_grmkey(grmkey):
+    redirect('/%s/' % grmkey)
+
+
+@route('/<grmkey>/')
+@route('/<grmkey>/parse')
+@view('main')
+def main(grmkey):
+    grm = get_grammar(grmkey)
+    sent = request.query.get('sentence')
+    return {
+        'title': '%s | %s' % (grm['name'], app.config['demophin.title']),
+        'header': grm.get('description', grm['name']),
+        'query': '' if sent is None else sent,
+    }
+
+
+@route('/<grmkey>/parse', method='POST')
+def parse(grmkey):
+    grm = get_grammar(grmkey)
+    sent = request.forms.get('sentence')
+    result = parse_sentence(grm, sent)
+    return {
+        'sentence': '' if sent is None else sent,
         'result': result
     }
 
 
-def parse_sentence(sent):
+def get_grammar(grmkey):
+    grmkey = grmkey.lower()  # normalize key
+    if grmkey not in grammars:
+        abort(404, 'No grammar is specified for "%s".' % grmkey)
+    grm = grammars.get(grmkey)
+    if not os.path.exists(grm.get('path')):
+        abort(404, 'The grammar could not be found.')
+    return grm
+
+
+def parse_sentence(grm, sent):
     if not sent:
         return None
-    grm = app.config['demophin.grammar']
-    with AceParser(grm, **ace_options) as parser:
+    with AceParser(grm['path'], **ace_options) as parser:
         result = parser.interact(sent)
     if not result:
         return None
@@ -90,21 +122,33 @@ def d3ify_dmrs(x):
     return data
 
 
-@route('/generate', method='POST')
-def generate():
+@route('/<grmkey>/generate', method='POST')
+def generate(grmkey):
+    grm = get_grammar(grmkey)
     mrs = request.forms.get('mrs')
-    return generate_sentences(mrs)
+    return generate_sentences(grm, mrs)
 
 
-def generate_sentences(mrs):
+def generate_sentences(grm, mrs):
     if not mrs:
         return None
-    grm = app.config['demophin.grammar']
-    with AceGenerator(grm, **ace_options) as generator:
+    with AceGenerator(grm['path'], **ace_options) as generator:
         return generator.interact(mrs)
+
+@error(404)
+@view('error404')
+def error404(error):
+    return {'error': error.body}
 
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        app.config['demophin.grammar'] = sys.argv[1]
+        app.config['demophin.grammars'] = [{
+            "name": os.path.basename(sys.argv[1]),
+            "path": sys.argv[1]
+        }]
+        grammars = {}
+        for gramdata in app.config['demophin.grammars']:
+            grammars[gramdata['name'].lower()] = gramdata
+
     run()

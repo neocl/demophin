@@ -1,10 +1,16 @@
 {
-	"demophin": {
-		"title": "Demophin: A Web Demo for DELPH-IN Grammars",
-		"grammar": "gram.dat",
-		"ace": {
-			"executable": "ace",
-			"cmdargs": ["-n", "5"]
-		}
-	}
+    "demophin": {
+        "title": "Demophin: A Web Demo for DELPH-IN Grammars",
+        "grammars": [
+            {
+                "name": "ERG",
+                "path": "./erg.dat",
+                "description": "The English Resource Grammar"
+            }
+        ],
+        "ace": {
+            "executable": "ace",
+            "cmdargs": ["-n", "5"]
+        }
+    }
 }
