@@ -18,6 +18,7 @@
   </div>
   <div id="sentence" class="sentence"></div>
   <div id="parseresults"></div>
+  <div id="tooltip" class="tooltip"></div>
   <div id="parsestatus" class="status"></div>
   % if query:
     <script>

@@ -106,6 +106,20 @@
 .link.in.labelset { fill: darkorange; stroke: darkorange; }
 .link.out.labelset { fill: green; stroke: green; }
 
+/* thanks: http://bl.ocks.org/d3noob/a22c42db65eb00d4e369 */
+.tooltip {
+  position: absolute;
+  text-align: center;
+  padding: 2px;
+  font: 12px sans-serif;
+  color: #FFF;
+  background: #444;
+  border: 0px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .status {
   font-size: small;
 }

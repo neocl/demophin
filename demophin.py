@@ -97,8 +97,9 @@ def d3ify_dmrs(x):
     x = loads_one(x)
     nodeidx = {0: 0}
     for i, node in enumerate(nodes(x)):
-        cfrom, cto = node[3][1] if node[3] is not None else -1, -1
+        cfrom, cto = node[3][1] if node[3] is not None else (-1, -1)
         cvarsort = node[2].get('cvarsort') if node[2] is not None else None
+        varprops = x.properties(node[0])
         carg = node[6] if len(node) >= 7 else None
 
         data['nodes'].append({
@@ -107,7 +108,8 @@ def d3ify_dmrs(x):
             'cfrom': cfrom,
             'cto': cto,
             'cvarsort': cvarsort,
-            'carg': carg
+            'carg': carg,
+            'varprops': varprops
         })
         nodeidx[node[0]] = i+1
     for link in links(x):

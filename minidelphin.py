@@ -217,7 +217,7 @@ class Xmrs(object):
             return dict(self._vars[var_or_nodeid]['props'])
         elif var_or_nodeid in self._eps:
             var = self._eps[var_or_nodeid][3].get(IVARG_ROLE)
-            return dict(self._vars.get(var, []))
+            return dict(self._vars.get(var, {}).get('props', []))
         else:
             raise KeyError(var_or_nodeid)
 

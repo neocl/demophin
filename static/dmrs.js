@@ -271,6 +271,9 @@ function dmrsDisplay(svgElem, graph) {
       // calculate source and target for links
       prepareGraph(graph);
 
+      var tip = d3.select("#tooltip")
+          .style("opacity", 0);
+
       var id = svgElem;
       var svg = d3.select(svgElem)
         .attr("height", ((graph.maxTopLevel - graph.maxBottomLevel + 3) * level_dy));
@@ -292,7 +295,14 @@ function dmrsDisplay(svgElem, graph) {
       var nodes = g.selectAll(".node").order()
           .data(graph.nodes)
         .enter().append("svg:g")
-          .attr("class", "node");
+          .attr("class", "node")
+          .each(function(d) {
+            var vps = [];
+            for (var key in d.varprops) {
+              vps.push("<td>" + key + "</td><td>=</td><td>" + d.varprops[key] + "</td>");
+            }
+            d.tooltipText = "<table><tr>" + vps.join("</tr><tr>") + "</tr></table>";
+          });
       nodes.append("svg:text")
           .attr("class", "nodeText")
           .text(function(d) {
@@ -323,10 +333,17 @@ function dmrsDisplay(svgElem, graph) {
       nodes.on("mouseover", function(d) {
               if (!graph.sticky) { d3.select(this).classed("selected", true) };
               updateHighlights(id);
+              tip.html(d.tooltipText)
+                .style("opacity", 0.8);
+          })
+          .on("mousemove", function(d) {
+              tip.style("left", (d3.event.pageX - 10) + "px")
+                .style("top", (d3.event.pageY + 15) + "px");
           })
           .on("mouseout", function(d) {
               if (!d.sticky) { d3.select(this).classed("selected", false); }
               updateHighlights(id);
+              tip.style("opacity", 0);
           })
           .on("click", function(d) {
               stickyState = toggleSticky(id, this, d);
