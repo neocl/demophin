@@ -1,7 +1,6 @@
 
 import sys
-import os.path
-#from os.path import abspath, dirname
+import os
 import json
 
 from bottle import (
@@ -10,16 +9,19 @@ from bottle import (
 
 from minidelphin import loads_one, nodes, links, AceParser, AceGenerator
 
-#cwd = abspath(dirname(__file__))
-#staticdir = pjoin(cwd, 'static')
 app = default_app()
 
-with open('./demophin.json') as fp:
+cwd = os.path.abspath(os.path.dirname(__file__))
+#staticdir = pjoin(cwd, 'static')
+with open(os.path.join(cwd, 'demophin.json')) as fp:
     app.config.load_dict(json.load(fp))
 
+ace_env = dict(os.environ)
+ace_env['LANG'] = 'en_US.UTF-8'  # change as necessary
 ace_options = {
     'executable': app.config['demophin.ace.executable'],
-    'cmdargs': app.config['demophin.ace.cmdargs']
+    'cmdargs': app.config['demophin.ace.cmdargs'],
+    'env': ace_env
 }
 
 grammars = {}
@@ -29,7 +31,7 @@ for gramdata in app.config['demophin.grammars']:
 
 @route('/static/<filepath:path>')
 def server_static(filepath):
-    return static_file(filepath, root='./static')
+    return static_file(filepath, root=os.path.join(cwd, 'static'))
 
 
 @route('/')
