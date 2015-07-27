@@ -1,14 +1,64 @@
 
+body {
+  background-color: #DDD;
+}
+
 .header {
+  display: block;
+  width: 100%;
   text-align: center;
-  font-size: x-large;
+  background-color: #DDD;
+  /*font-size: x-large;
+  font-weight: bold; */
+}
+
+.body {
+  margin-top: 110px;
+  margin-bottom: 20px;
+}
+
+.controls {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 95px;
+  padding: 5px;
+}
+
+#parseform input {
+  margin: 2px 0px;
+}
+
+.grammarname {
   font-weight: bold;
 }
+
+/*#sentenceinput {
+  font-size: 12pt;
+}
+
+#parseSubmit {
+  height: 12pt;
+}*/
 
 .sentence {
   text-align: center;
   font-size: larger;
   font-weight: bold;
+}
+
+.status {
+  /*position: fixed;
+  bottom: 100%;
+  left: 0px; */
+  width: 100%;
+  height: 20px;
+  font-size: small;
+}
+
+.error {
+  font-weight: bold;
+  font-size: large;
 }
 
 .result {
@@ -118,13 +168,4 @@
   border-radius: 8px;
   opacity: 0;
   pointer-events: none;
-}
-
-.status {
-  font-size: small;
-}
-
-.error {
-  font-weight: bold;
-  font-size: large;
 }

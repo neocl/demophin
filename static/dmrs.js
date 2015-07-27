@@ -26,7 +26,7 @@ function prepareGraph(graph) {
         d.source = nodeIdx[d.start];
         d.distance = Math.abs(d.source - d.target);
         // Quantifiers and undirected EQ links below preds
-        d.dir = (d.rargname == "" || d.post.toUpperCase() == "H") ? -1 : 1            
+        d.dir = (d.rargname == "" || d.post.toUpperCase() == "H") ? -1 : 1
     });
     graph.maxTopLevel = 0;
     graph.maxBottomLevel = 0;
@@ -179,7 +179,7 @@ function clearHighlights(id) {
         {"in": false, "out": false, "labelset": false, "scope": false}
     );
     d3.select(id).selectAll(".link").classed(
-        {"in": false, "out": false, "labelset": false, "scope": false}        
+        {"in": false, "out": false, "labelset": false, "scope": false}
     );
 }
 
@@ -244,7 +244,7 @@ function toggleSticky(id, node, d) {
 
 //   var svg = d3.select(id).append("svg")
 //     .append("svg:g");
-  
+
 //   var nodes = svg.selectAll(".node")
 //       .data(arcd.nodes())
 //     .enter().append("svg:g")
@@ -279,7 +279,7 @@ function dmrsDisplay(svgElem, graph) {
         .attr("height", ((graph.maxTopLevel - graph.maxBottomLevel + 3) * level_dy));
       var g = svg.append("svg:g")
           .attr("transform", "translate(0," + ((graph.maxTopLevel + 2) * level_dy) + ")");
-      
+
       g.append("defs").append("marker")
           .attr("class", "linkend")
           .attr("id", "arrowhead")
@@ -385,14 +385,25 @@ function dmrsDisplay(svgElem, graph) {
 //  });
 }
 
+function clearParseArtifacts() {
+  d3.select("#sentence").text("");
+  d3.select("#parseresults").html("");
+  d3.select("#parsestatus").text("");
+}
+
 function parseSentence(form) {
-  d3.select("#parseresults").selectAll(".result").remove();
+  clearParseArtifacts();
+  d3.select("#parseresults").append("div").text("Parsing...");
   d3.json("parse")
     .post(new FormData(form), function(error, data) {
+      d3.select("#parseresults").html("");
       if (data) {
         // Push history so the URL bar changes when a new sentence is parsed.
-        history.pushState(data, document.title, "parse?sentence=" + data.sentence);
-        d3.select("#sentence").text('Parse results for "'+data.sentence+'"');
+        history.pushState(data, document.title,
+          "parse?sentence=" + data.sentence +
+          "&n=" + data.nresults
+        );
+        d3.select("#sentence").text('"' + data.sentence + '"');
         showParseResults(data.result);
       } else {
         document.getElementById("parseresults").innerHTML = "Server error.";

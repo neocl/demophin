@@ -19,8 +19,8 @@ with open(os.path.join(cwd, 'demophin.json')) as fp:
 ace_env = dict(os.environ)
 ace_env['LANG'] = 'en_US.UTF-8'  # change as necessary
 ace_options = {
-    'executable': app.config['demophin.ace.executable'],
-    'cmdargs': app.config['demophin.ace.cmdargs'],
+    'executable': app.config.get('demophin.ace.executable', 'ace'),
+    'cmdargs': app.config.get('demophin.ace.cmdargs', []),
     'env': ace_env
 }
 
@@ -54,10 +54,12 @@ def bare_grmkey(grmkey):
 def main(grmkey):
     grm = get_grammar(grmkey)
     sent = request.query.get('sentence')
+    n = request.query.get('n', 5)
     return {
         'title': '%s | %s' % (grm['name'], app.config['demophin.title']),
-        'header': grm.get('description', grm['name']),
+        'grammar': grm,
         'query': '' if sent is None else sent,
+        'nresults': n
     }
 
 
@@ -65,9 +67,11 @@ def main(grmkey):
 def parse(grmkey):
     grm = get_grammar(grmkey)
     sent = request.forms.get('sentence')
-    result = parse_sentence(grm, sent)
+    n = request.forms.get('nresults', 5)
+    result = parse_sentence(grm, sent, n=n)
     return {
         'sentence': '' if sent is None else sent,
+        'nresults': n,
         'result': result
     }
 
@@ -82,10 +86,15 @@ def get_grammar(grmkey):
     return grm
 
 
-def parse_sentence(grm, sent):
+def parse_sentence(grm, sent, n=None):
     if not sent:
         return None
-    with AceParser(grm['path'], **ace_options) as parser:
+    # update cmdargs as necessary
+    opts = dict(ace_options)
+    if n is not None:
+        opts['cmdargs'] = opts['cmdargs'] + ['-n', str(n)]
+    # now try to get a parse
+    with AceParser(grm['path'], **opts) as parser:
         result = parser.interact(sent)
     if not result:
         return None
