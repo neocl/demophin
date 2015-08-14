@@ -45,7 +45,7 @@ def index():
 
 @route('/<grmkey>')
 def bare_grmkey(grmkey):
-    redirect('/%s/' % grmkey)
+    redirect('%s/' % grmkey)
 
 
 @route('/<grmkey>/')
