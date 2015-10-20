@@ -20,7 +20,7 @@ from subprocess import (check_call, CalledProcessError, Popen, PIPE, STDOUT)
 IVARG_ROLE = 'ARG0'
 CONSTARG_ROLE = 'CARG'
 QUANTIFIER_POS = 'q'
-var_re = re.compile(r'^(\w*\D)(\d+)$')
+var_re = re.compile(r'^([-\w]*\D)(\d+)$')
 
 
 class PyDelphinException(Exception):
