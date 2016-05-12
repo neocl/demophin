@@ -7,10 +7,18 @@
                 "path": "./erg.dat",
                 "description": "The English Resource Grammar"
             }
+            , {
+                "name": "JACY",
+                "path": "./jacy.dat",
+                "description": "The Japanese Grammar",
+                "preprocessor" : "pyjacy",
+                "aceopts" : [ "-y" ]
+            }
+
         ],
         "ace": {
             "executable": "ace",
-            "cmdargs": ["-n", "5"]
+            "cmdargs": ["-n 10" ]
         }
     }
 }

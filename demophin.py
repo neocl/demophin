@@ -4,6 +4,18 @@
 import sys
 import os
 import json
+import logging
+
+# LTA 2016-05-12
+import importlib
+
+def preprocess(sent, processor_name):
+    try:
+        i = importlib.import_module(processor_name)
+        return i.get_ace_input(sent)
+    except Exception as e:
+        logging.error("Preprocessor cannot be used (Error = %s)" % (e,))
+        pass
 
 from bottle import (
     abort, error, default_app, redirect, request, route, run, static_file, view
@@ -69,7 +81,12 @@ def parse(grmkey):
     grm = get_grammar(grmkey)
     sent = request.forms.get('sentence')
     n = request.forms.get('nresults', 5)
-    result = parse_sentence(grm, sent, n=n)
+    # use preprocessor if available
+    if grm.get('preprocessor'):
+        parse_input = preprocess(sent, grm.get('preprocessor'))
+    else:
+        parse_input = sent
+    result = parse_sentence(grm, parse_input, n=n)
     return {
         'sentence': '' if sent is None else sent,
         'nresults': n,
@@ -92,8 +109,15 @@ def parse_sentence(grm, sent, n=None):
         return None
     # update cmdargs as necessary
     opts = dict(ace_options)
+    # use optional ACE args
+    if grm.get('aceopts'):
+        opts['cmdargs'] += grm.get('aceopts')
+    # update n properly
     if n is not None:
-        opts['cmdargs'] = opts['cmdargs'] + ['-n', str(n)]
+        for i in range(len(opts['cmdargs'])):
+            if opts['cmdargs'][i].startswith('-n '):
+                opts['cmdargs'][i] = '-n ' + str(n)
+    logging.debug("Calling ACE using these opts: %s" % (opts['cmdargs'],))
     # now try to get a parse
     with AceParser(grm['path'], **opts) as parser:
         result = parser.interact(sent)
@@ -156,11 +180,17 @@ def error404(error):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
         app.config['demophin.grammars'] = [{
             "name": os.path.basename(sys.argv[1]),
             "path": sys.argv[1]
         }]
+        #TODO: use argparse instead
+    for arg in sys.argv:
+        if arg == '-v':
+            logging.basicConfig(level=logging.DEBUG)
+            logging.debug("Debug mode is activated")
+                
         grammars = {}
         for gramdata in app.config['demophin.grammars']:
             grammars[gramdata['name'].lower()] = gramdata
