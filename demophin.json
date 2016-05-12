@@ -10,7 +10,7 @@
             , {
                 "name": "JACY",
                 "path": "./jacy.dat",
-                "description": "The Japanese Grammar",
+                "description": "The Jacy Japanese Grammar",
                 "preprocessor" : "pyjacy",
                 "aceopts" : [ "-y" ]
             }
