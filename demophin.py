@@ -117,6 +117,8 @@ def parse_sentence(grm, sent, n=None):
         for i in range(len(opts['cmdargs'])):
             if opts['cmdargs'][i].startswith('-n '):
                 opts['cmdargs'][i] = '-n ' + str(n)
+    #  uniqify
+    opts['cmdargs'] = list(set(opts['cmdargs']))
     logging.debug("Calling ACE using these opts: %s" % (opts['cmdargs'],))
     # now try to get a parse
     with AceParser(grm['path'], **opts) as parser:
