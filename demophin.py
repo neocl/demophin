@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 import os
@@ -28,7 +30,6 @@ grammars = {}
 for gramdata in app.config['demophin.grammars']:
     grammars[gramdata['name'].lower()] = gramdata
 
-
 @route('/static/<filepath:path>')
 def server_static(filepath):
     return static_file(filepath, root=os.path.join(cwd, 'static'))
@@ -53,7 +54,7 @@ def bare_grmkey(grmkey):
 @view('main')
 def main(grmkey):
     grm = get_grammar(grmkey)
-    sent = request.query.get('sentence')
+    sent = request.query.getunicode('sentence')
     n = request.query.get('n', 5)
     return {
         'title': '%s | %s' % (grm['name'], app.config['demophin.title']),
